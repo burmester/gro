@@ -6,7 +6,7 @@
     "url": "git+https://github.com/burmester/gro.git"
   },
   "private": true,
-  "homepage": "codenamegro.netlify.com",
+  "homepage": ".",
   "author": "Johan Burmester",
   "license": "ISC",
   "dependencies": {
