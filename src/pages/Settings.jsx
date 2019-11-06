@@ -16,12 +16,11 @@ export default class Settings extends React.Component {
 
   render() {
     const data = this.context.data;
-    if (!data) return false
     return (
       <Fragment>
         <Row>
           <Col xs="12" md="4">
-            <h3>Dina konton</h3>
+            <h1>Settings</h1>
           </Col>
         </Row>
       </Fragment>

@@ -15,10 +15,8 @@ export default class Start extends React.Component {
   render() {
     return (
       <Fragment>
-        <h2>Välkommen</h2>
-        <p>
-          Här kan du se ditt innehav.
-        </p>
-      </Fragment>)
+        <h1>Start</h1>
+      </Fragment>
+      )
   }
 }

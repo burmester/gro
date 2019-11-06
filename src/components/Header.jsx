@@ -14,37 +14,20 @@ class Header extends Component {
   render() {
     return (
       <Fragment>
-        <Row className="header d-none">
+        <Row className="header">
           <Col>
-            <ReactSVG svgStyle={{
-              minWidth: "120px",
-              maxWidth: "200px",
-              width: "30%",
-              height: "auto"
-            }} svgClassName="logo" src={'./images/normal.svg'} />
+            Codename Gro
           </Col>
         </Row>
         <Row className="menu">
           <Col>
             <ButtonGroup>
-              <Button outline size="sm" onClick={() => {
-                ReactGA.event({
-                  category: 'Menu',
-                  action: 'Settings'
-                });
-                history.push('/settings');
-              }}>
-                Inställningar
+              <Button outline color="danger" size="sm" onClick={() => history.push('/')}>
+                Start
               </Button>
-              <Button outline color="danger" size="sm" onClick={() => this.context.removeData(() => {
-                ReactGA.event({
-                  category: 'Menu',
-                  action: 'Remove data'
-                });
-                history.push('/');
-              })}>
-                Töm innehav
-              </Button>
+              <Button outline size="sm" onClick={() => history.push('/settings')}>
+                Settings
+                </Button>
             </ButtonGroup>
           </Col>
         </Row>

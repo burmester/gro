@@ -10,7 +10,7 @@ class Header extends Component {
         <Row className="footer">
           <Col>
           <p> 
-            Din data sparas lokalt i webbläsare i from av <i>local Storage</i> denna töms när du tömmer ditt innehav. 
+            Din data sparas lokalt i webbläsare i from av <i>local Storage</i>.
           </p>
           <p>
             Cookies används för Google Analytics.
