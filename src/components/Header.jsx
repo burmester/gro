@@ -1,8 +1,5 @@
 import React, { Component, Fragment } from 'react';
 import { Button, ButtonGroup, Col, Row } from 'reactstrap';
-import ReactSVG from 'react-svg'
-
-import ReactGA from 'react-ga';
 
 import history from '../utils/history';
 

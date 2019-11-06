@@ -1,6 +1,5 @@
 import React, { Fragment } from 'react';
 import { Col, Row } from 'reactstrap';
-import Switch from "react-switch";
 
 import Context from '../context/defaultContext';
 
@@ -15,7 +14,6 @@ export default class Settings extends React.Component {
   }
 
   render() {
-    const data = this.context.data;
     return (
       <Fragment>
         <Row>
