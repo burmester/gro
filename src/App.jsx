@@ -9,10 +9,7 @@ import GlobalState from './context/GlobalState';
 import Start from './pages/Start';
 import Settings from './pages/Settings';
 
-
 import Header from './components/Header';
-import Footer from './components/Footer';
-
 
 export default class App extends Component {
     render () {
@@ -25,7 +22,6 @@ export default class App extends Component {
                             <Route exact path="/" component={Start} />
                             <Route exact path="/settings" component={Settings} />
                         </Switch>
-                        <Footer />
                     </Container>
                 </Router>
             </GlobalState>

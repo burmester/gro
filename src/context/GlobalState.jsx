@@ -1,12 +1,11 @@
 import React, { Component } from "react";
 
 import Context from "./defaultContext";
-import history from "../utils/history";
 
 class GlobalState extends Component {
 
   state = {
-    data: undefined,
+    data: [],
     loading: false
   };
 
@@ -14,14 +13,14 @@ class GlobalState extends Component {
     const data = localStorage.getItem("data");
     if (data) {
       this.setState({
-        data: JSON.parse(data),
-      }, () => history.push("/"));
+        data: JSON.parse(data)
+      });
     }
   }
 
   removeData = callback => {
     localStorage.clear();
-    this.setState({ data: undefined }, callback);
+    this.setState({ data: [] }, callback);
   };
 
   saveData = callback => {
@@ -41,6 +40,13 @@ class GlobalState extends Component {
     this.setState({ data: body }, callback);
   }
 
+  addItem = async (query, callback) => {
+    this.setState({ data: [...this.state.data, query], callback })
+  }
+
+  removeItem = async (removeItem, callback) => {
+    this.setState({data: this.state.data.filter(item => item !== removeItem)})
+  }
 
   render() {
     return (
@@ -48,9 +54,8 @@ class GlobalState extends Component {
         value={{
           data: this.state.data,
           loading: this.state.loading,
-          removeData: this.removeData,
-          saveData: this.saveData,
-          getData: this.getData,
+          removeItem: this.removeItem,
+          addItem: this.addItem
         }}
       >
         {this.props.children}
