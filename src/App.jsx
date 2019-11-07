@@ -7,7 +7,7 @@ import history from './utils/history';
 import GlobalState from './context/GlobalState';
 
 import Start from './pages/Start';
-import Settings from './pages/Settings';
+import Compare from './pages/Compare';
 
 import Header from './components/Header';
 
@@ -20,7 +20,7 @@ export default class App extends Component {
                         <Header />
                         <Switch>
                             <Route exact path="/" component={Start} />
-                            <Route exact path="/settings" component={Settings} />
+                            <Route exact path="/compare" component={Compare} />
                         </Switch>
                     </Container>
                 </Router>

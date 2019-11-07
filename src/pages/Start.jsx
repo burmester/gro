@@ -5,6 +5,7 @@ import Search from '../components/Search';
 
 import ReactGA from 'react-ga'
 
+import history from '../utils/history';
 
 export default class Start extends React.Component {
   static contextType = Context;
@@ -24,11 +25,16 @@ export default class Start extends React.Component {
         <Search addItem={this.addItem} />
         {this.context.data.map((item, i) => (
           <div key={i}>
-            {item}
+            {item.query}
           </div>
         ))
         }
+        <div>
+          <button onClick={() => this.context.saveData(() => {
+            history.push('/compare')
+          })}>Jämför</button>
+        </div>
       </Fragment>
-      )
+    )
   }
 }
