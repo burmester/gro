@@ -15,7 +15,25 @@ export default class Compare extends React.Component {
     ReactGA.pageview("Compare");
   }
 
+  compare = () => {
+   const result = this.context.data.map(item => {
+      const common = item.matHem.find(matHemProduct => {
+        let ica = item.ica.find(icaProduct => icaProduct.id === matHemProduct.gtin)
+        if (ica) {
+          let mat = item.mat.find(matProduct => matProduct.ean === matHemProduct.gtin)
+          if (mat) return true
+        }
+        return false
+      })
+      if(common) return common
+      return false
+})
+    console.log(result)
+    return result
+  }
+
   render() {
+    this.compare();
     return (
       <Fragment>
         <Row>
