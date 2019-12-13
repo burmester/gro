@@ -42,8 +42,9 @@ class GlobalState extends Component {
   }
 
   getHemkop = async (query) => {
-    // DO NOT WORK, CORS
     return false
+    /*
+    DO NOT WORK, CORS
     const response = await fetch("https://www.hemkop.se/search?avoidCache=1573151389596&q=" + query + "&size=40",
       {
         "method": "GET"
@@ -51,6 +52,7 @@ class GlobalState extends Component {
     const body = await response.json();
     if (response.status !== 200) throw Error(body.message);
     return body
+    */
   }
 
   getIca = async (query) => {
@@ -102,17 +104,18 @@ class GlobalState extends Component {
 
     this.setState({
       data: [...this.state.data, {
+        order: this.state.data.length,
         query: query,
         matHem: matHem,
         hemkop: hemkop,
         ica: ica,
         mat: mat
-      }], callback
-    })
+      }]
+    }, callback)
   }
 
   removeItem = async (removeItem, callback) => {
-    this.setState({ data: this.state.data.filter(item => item.query !== removeItem.qsuery) })
+    this.setState({ data: this.state.data.filter(item => item.query !== removeItem.query) })
   }
 
   render() {

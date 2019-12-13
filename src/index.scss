@@ -1,4 +1,5 @@
 $primary-color: rgb(103, 58, 183);
+$destructiv-color: #dc3545;
 $background-color: #fbfaf8;
 
 html,
@@ -8,9 +9,103 @@ body {
   margin: 0;
 }
 
+h3 {
+  font-size: 16px;
+  font-weight: 700;
+}
+
 #root {
   background-color: $background-color;
   min-height: 100%;
+}
+
+button {
+  border-radius: 5px;
+  background: $primary-color;
+  border: none;
+  color: #FFFFFF;
+  width: 150px;
+  padding: 10px;
+  cursor: pointer;
+
+  .spinner {
+    -webkit-filter: grayscale(1) brightness(5);
+    filter: grayscale(1) brightness(5);
+  }
+
+  &.button-destuctive {
+    background: $destructiv-color;
+  }
+
+  &.button--remove {
+    background: none;
+    color: black;
+    width: auto;
+    padding: 3px;
+  }
+}
+
+input {
+  border-radius: 5px;
+  border: 1px solid $primary-color;
+  padding: 10px;
+}
+
+.header {
+  padding-top: 50px;
+}
+
+.search {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+
+  label {
+    margin: 0;
+    width: 100%;
+
+    input {
+      width: 100%;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+  }
+
+  button {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+}
+
+.artical-list {
+  margin: 10px;
+
+  .artical {
+    text-transform: capitalize;
+  }
+}
+
+.item {
+  display: flex;
+  align-items: center;
+
+  img {
+    width: 100px;
+    padding-right: 5px;
+  }
+}
+
+.button-bar {
+  display: flex;
+  margin-bottom: 10px;
+
+  &.button-bar--center {
+    justify-content: center;
+  }
+
+  button {
+    margin-left: 5px;
+  }
 }
 
 .spinner {

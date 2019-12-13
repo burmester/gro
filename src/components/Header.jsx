@@ -11,7 +11,7 @@ class Header extends Component {
       <Fragment>
         <Row className="header">
           <Col>
-            Codename Gro
+            <h3>Jämnför varor</h3>
           </Col>
         </Row>
       </Fragment>
