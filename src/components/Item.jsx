@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 export default function Item(props) {
-    const [query, setQuery] = useState("");
-
     return (
         <td>
-            <div className="item">
-                <img src={props.image} alt={props.name} />
+            <div className={props.isSelected ? "item selected" : "item"}>
+                <button onClick={props.selectItem}>
+                    <img  src={props.image} alt={props.name} />
+                </button>
                 <div>
                     <h3>{props.name}</h3>
                     <div>{props.price} kr</div>

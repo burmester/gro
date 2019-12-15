@@ -2,6 +2,7 @@ import React, { Fragment } from 'react';
 
 import Context from '../context/defaultContext';
 import Search from '../components/Search';
+import Spinner from '../components/Spinner'
 
 import ReactGA from 'react-ga'
 
@@ -33,7 +34,7 @@ export default class Start extends React.Component {
         <div className="button-bar button-bar--center">
           <button onClick={() => this.context.saveData(() => {
             history.push('/compare')
-          })}>Jämför</button>
+          })}>{this.context.isRating ? (<Spinner width="15px" image={"./spinner.png"} />) : "Jämnför"}</button>
         </div>
       </Fragment>
     )

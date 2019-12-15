@@ -2,12 +2,30 @@ import React, { Component } from "react";
 
 import Context from "./defaultContext";
 
+import Levenshtein from 'fast-levenshtein';
+
+
 class GlobalState extends Component {
 
   state = {
     data: [],
-    loading: false
+    isRating: false,
+    isLoading: false
   };
+
+  item = (name, price, comparePrice, category, image) => {
+    return {
+      name: name,
+      price: price,
+      comparePrice: comparePrice,
+      category: category,
+      image: image,
+      selected: false,
+      icaItems: [],
+      matItems: [],
+      matHemItems: []
+    }
+  }
 
   componentDidMount() {
     const data = localStorage.getItem("data");
@@ -24,7 +42,15 @@ class GlobalState extends Component {
   };
 
   saveData = callback => {
-    localStorage.setItem("data", JSON.stringify(this.state.data));
+    /*
+    const data = this.state.data.map(item => {
+      return {
+        query: item.query,
+        order: item.order
+      }
+    })
+    localStorage.setItem("data", JSON.stringify(data));
+    */
     callback();
   }
 
@@ -38,7 +64,12 @@ class GlobalState extends Component {
       });
     const body = await response.json();
     if (response.status !== 200) throw Error(body.message);
-    return body.products
+    let list = [];
+    for (const [index, p] of body.products.entries()) {
+      if (index >= 10) break;
+      list.push(this.item(p.name, p.price, p.comparisonPrice, p.department.name, p.images.SMALL))
+    }
+    return list
   }
 
   getHemkop = async (query) => {
@@ -58,13 +89,17 @@ class GlobalState extends Component {
   getIca = async (query) => {
     const searchResult = await fetch("https://handla.ica.se/api/search-info/v1/search/skus?storeId=13418&ct=B2C&searchTerm=" + query + "&skipCategories=true&limit=1200");
     const searchResultJson = await searchResult.json();
-
     const productsIds = searchResultJson.products.slice(0, 10).join()
-
     const response = await fetch("https://handla.ica.se/api/content/v1/collections/customer-type/B2C/store/ica-kvantum-liljeholmen-id_13418/products?productIds=" + productsIds);
     const body = await response.json();
     if (response.status !== 200) throw Error(body.message);
-    return body
+
+    let list = [];
+    for (const [index, p] of body.entries()) {
+      if (index >= 10) break;
+      list.push(this.item(p.product.name, p.price.listPrice, p.price.comparePrice, p.product.categories[0].categoryPath[1].name, "https://assets.icanet.se/t_product_medium_v1,f_auto/" + p.product.imageId + ".jpg"))
+    }
+    return list
   }
 
   getMat = async (query) => {
@@ -72,50 +107,177 @@ class GlobalState extends Component {
       {
         "credentials": "omit",
         "headers": {
-          "accept": "application/json", 
+          "accept": "application/json",
           "accept-language": "en-GB,en-US;q=0.9,en;q=0.8,sv;q=0.7",
-          "cache-control": "no-cache", 
+          "cache-control": "no-cache",
           "content-type": "application/x-www-form-urlencoded",
-          "pragma": "no-cache", 
-          "sec-fetch-mode": "cors", 
+          "pragma": "no-cache",
+          "sec-fetch-mode": "cors",
           "sec-fetch-site": "cross-site"
-        }, 
-        "referrer": "https://www.mat.se/", 
+        },
+        "referrer": "https://www.mat.se/",
         "referrerPolicy": "origin-when-cross-origin",
-        "body": "{\"requests\":[{\"indexName\":\"Prod_Product_5_most_sold\",\"params\":\"query="+query+"&optionalFacetFilters=%5B%22featuredProductSearchTerm%3A"+query+"%22%5D&hitsPerPage=12&maxValuesPerFacet=40&page=0&getRankingInfo=false&facets=%5B%22categories.id%22%2C%22categories.lineageIds%22%2C%22labelTags.tag%22%2C%22displayBrand%22%2C%22_tags%22%2C%22id%22%2C%22tagNames%22%5D&tagFilters=ACTIVE%2C-SAMPLE\"}]}",
+        "body": "{\"requests\":[{\"indexName\":\"Prod_Product_5_most_sold\",\"params\":\"query=" + query + "&optionalFacetFilters=%5B%22featuredProductSearchTerm%3A" + query + "%22%5D&hitsPerPage=12&maxValuesPerFacet=40&page=0&getRankingInfo=false&facets=%5B%22categories.id%22%2C%22categories.lineageIds%22%2C%22labelTags.tag%22%2C%22displayBrand%22%2C%22_tags%22%2C%22id%22%2C%22tagNames%22%5D&tagFilters=ACTIVE%2C-SAMPLE\"}]}",
         "method": "POST",
         "mode": "cors"
       });
     const body = await response.json();
     if (response.status !== 200) throw Error(body.message);
-    return body.results.pop().hits
+    let list = [];
+    for (const [index, p] of body.results.pop().hits.entries()) {
+      if (index >= 10) break;
+      list.push(this.item(p.name, p.price, p.comparisonPrice, p.categories[0].firstLevelParentCategoryName, p.imageUrl))
+    }
+    return list
   }
 
+  rateItem = async (item) => {
+    const pointsAlgorithm = (
+      comparePrice1, comparePrice2,
+      price1, price2,
+      name1, name2,
+      cat1, cat2,
+      query) => {
+      const diffcomparePrice = Math.round(Math.abs(comparePrice1 - comparePrice2));
+      const diffPrice = Math.round(Math.abs(price1 - price2));
+      const levName = Levenshtein.get(name1, name2);
+      const levCat = Levenshtein.get(cat1, cat2);
+      if (!query) return diffcomparePrice + diffPrice + levName + levCat * 10
+      const levQuery = Levenshtein.get(query, name1);
+      const levQueryPop = Levenshtein.get(query, name2);
+      return diffcomparePrice + diffPrice + levName + levCat * 10 + levQuery + levQueryPop
+    }
+    const itemRates = (item, points) => {
+      return {
+        item: item,
+        points: points
+      }
+    }
+    const query = item.query
+    const matHem = item.result.find(store => store.store === "matHem")
+    const ica = item.result.find(store => store.store === "ica")
+    const mat = item.result.find(store => store.store === "mat")
+
+    matHem.items.forEach((matHemItem, i) => {
+      ica.items.forEach((icaItem, j) => {
+        const pointsIcaMatHem = pointsAlgorithm(
+          icaItem.comparePrice, matHemItem.comparePrice,
+          icaItem.price, matHemItem.price,
+          icaItem.name, matHemItem.name,
+          icaItem.category, matHemItem.category,
+          query.query)
+
+        matHemItem.icaItems.push(itemRates(icaItem, pointsIcaMatHem))
+        icaItem.matHemItems.push(itemRates(matHemItem, pointsIcaMatHem))
+
+        mat.items.forEach((matItem, k) => {
+          if (j === 0) {
+            const pointsMathemMat = pointsAlgorithm(
+              matItem.comparePrice, matHemItem.comparePrice,
+              matItem.price, matHemItem.price,
+              matItem.name, matHemItem.name,
+              matItem.category, matHemItem.category,
+              query.query)
+            matHemItem.matItems.push(itemRates(matItem, pointsMathemMat))
+            matItem.matHemItems.push(itemRates(matHemItem, pointsMathemMat))
+          }
+
+          const pointsMatIca = pointsAlgorithm(
+            matItem.comparePrice, icaItem.comparePrice,
+            matItem.price, icaItem.price,
+            matItem.name, icaItem.name,
+            matItem.category, icaItem.category,
+            query.query)
+
+          icaItem.matItems.push(itemRates(matItem, pointsMatIca))
+          matItem.icaItems.push(itemRates(icaItem, pointsMatIca))
+
+        })
+      })
+    })
+    return item
+  }
+
+  sortRatedItem = async (item) => {
+    const matHem = item.result.find(store => store.store === "matHem")
+    const ica = item.result.find(store => store.store === "ica")
+    const mat = item.result.find(store => store.store === "mat")
+
+    let selected = matHem.items.find(item => item.selected)
+    if (selected) {
+      debugger;
+      return {
+        matHem: selected,
+        ica: selected.icaItems.reduce((prev, curr) => prev.points < curr.points ? prev : curr).item,
+        mat: selected.matItems.reduce((prev, curr) => prev.points < curr.points ? prev : curr).item
+      }
+    }
+    selected = ica.items.find(item => item.selected)
+    if (selected) {
+      debugger;
+      return {
+        ica: selected,
+        matHem: selected.matHemItems.reduce((prev, curr) => prev.points < curr.points ? prev : curr).item,
+        mat: selected.matItems.reduce((prev, curr) => prev.points < curr.points ? prev : curr).item
+      }
+    }
+    selected = mat.items.find(item => item.selected)
+    if (selected) {
+      debugger;
+      return {
+        ica: selected.icaItems.reduce((prev, curr) => prev.points < curr.points ? prev : curr).item,
+        matHem: selected.matHemItems.reduce((prev, curr) => prev.points < curr.points ? prev : curr).item,
+        mat: selected
+      }
+    }
+    debugger;
+    return {
+      matHem: matHem.items[0],
+      ica: matHem.items[0].icaItems.reduce((prev, curr) => prev.points < curr.points ? prev : curr).item,
+      mat: matHem.items[0].matItems.reduce((prev, curr) => prev.points < curr.points ? prev : curr).item
+    }
+  }
 
   addItem = async (query, callback) => {
     if (this.state.data.find(item => item.query === query)) {
       callback()
       return false;
     }
-    const matHem = await this.getMatHem(query)  
-    const hemkop = await this.getHemkop(query)
+    const matHem = await this.getMatHem(query)
+    // const hemkop = await this.getHemkop(query)
     const ica = await this.getIca(query)
     const mat = await this.getMat(query)
 
+    const item = {
+      order: this.state.data.length,
+      query: query,
+      result: [
+        { store: "matHem", items: matHem },
+        { store: "ica", items: ica },
+        { store: "mat", items: mat }
+      ]
+    }
     this.setState({
-      data: [...this.state.data, {
-        order: this.state.data.length,
-        query: query,
-        matHem: matHem,
-        hemkop: hemkop,
-        ica: ica,
-        mat: mat
-      }]
+      data: [...this.state.data, item],
+      isRating: true
     }, callback)
+
+    await this.rateItem(item)
+    item.items = await this.sortRatedItem(item)
+    this.setState({ isRating: false })
   }
 
   removeItem = async (removeItem, callback) => {
     this.setState({ data: this.state.data.filter(item => item.query !== removeItem.query) })
+  }
+
+  selectItem = async (selected, item) => {
+    item.items.matHem.selected = false
+    item.items.ica.selected = false
+    item.items.mat.selected = false
+    selected.selected = true
+    item.items = await this.sortRatedItem(item)
+    this.setState({ data: this.state.data })
   }
 
   render() {
@@ -123,11 +285,13 @@ class GlobalState extends Component {
       <Context.Provider
         value={{
           data: this.state.data,
-          loading: this.state.loading,
+          isLoading: this.state.isLoading,
+          isRating: this.state.isRating,
           saveData: this.saveData,
           removeData: this.removeData,
           removeItem: this.removeItem,
-          addItem: this.addItem
+          addItem: this.addItem,
+          selectItem: this.selectItem
         }}
       >
         {this.props.children}
