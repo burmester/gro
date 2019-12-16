@@ -40,15 +40,14 @@ export default class Compare extends React.Component {
   }
 
   render() {
-    console.log(this.context.data)
     return (
       <Fragment>
         <Row>
           <Col className="button-bar">
-            <button onClick={() => {
+            <button className="button--primary" onClick={() => {
               history.push('/')
             }}>Lägg till fler</button>
-            <button className="button-destuctive" onClick={() => this.context.removeData(() => {
+            <button className="button--destuctive" onClick={() => this.context.removeData(() => {
               history.push('/')
             })}>Töm</button>
           </Col>
@@ -73,18 +72,24 @@ export default class Compare extends React.Component {
                   price={item.items.matHem.price.toFixed(2)}
                   selectItem={e => this.selectItem(item.items.matHem, item)}
                   isSelected={item.items.matHem.selected}
+                  expandingItem={item.result.find(store => store.store === "matHem").items}
+                  selectExpandedItem={selectedItem => this.selectItem(selectedItem, item)}
                   image={item.items.matHem.image} />
                   <Item
                   name={item.items.ica.name}
                   price={item.items.ica.price.toFixed(2)}
                   selectItem={e => this.selectItem(item.items.ica, item)}
                   isSelected={item.items.ica.selected}
+                  expandingItem={item.result.find(store => store.store === "ica").items}
+                  selectExpandedItem={selectedItem => this.selectItem(selectedItem, item)}
                   image={item.items.ica.image} />
                   <Item
                   name={item.items.mat.name}
                   price={item.items.mat.price.toFixed(2)}
                   selectItem={e => this.selectItem(item.items.mat, item)}
                   isSelected={item.items.mat.selected}
+                  expandingItem={item.result.find(store => store.store === "mat").items}
+                  selectExpandedItem={selectedItem => this.selectItem(selectedItem, item)}
                   image={item.items.mat.image} />
               </tr>
             ))

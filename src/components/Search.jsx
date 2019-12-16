@@ -22,7 +22,7 @@ export default function Search(props) {
                     if (e.key === "Enter") handleAddItem()
                 }} />
             </label>
-            <button onClick={handleAddItem}>{loading ? (<Spinner width="15px" image={"./spinner.png"} />) : "Lägg till"}</button>
+            <button className="button--primary" onClick={handleAddItem}>{loading ? (<Spinner width="15px" image={"./spinner.png"} />) : "Lägg till"}</button>
         </div>
     );
 }

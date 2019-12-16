@@ -32,7 +32,7 @@ export default class Start extends React.Component {
           }
         </div>
         <div className="button-bar button-bar--center">
-          <button onClick={() => this.context.saveData(() => {
+          <button className="button--primary" onClick={() => this.context.saveData(() => {
             history.push('/compare')
           })}>{this.context.isRating ? (<Spinner width="15px" image={"./spinner.png"} />) : "Jämnför"}</button>
         </div>
