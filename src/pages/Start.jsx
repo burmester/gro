@@ -19,6 +19,7 @@ export default class Start extends React.Component {
     return (
       <Fragment>
         <Search addItem={this.context.addItem} />
+        {this.context.error && this.context.error.code === 1 && (<div className="error"> Varan "{this.context.error.msg}" kunde hittas. Var god testa igen.</div>)}
         <div className="artical-list" style={{ "columnCount": this.context.data.length <= 10 ? "1" : this.context.data.length <= 20 ? "2" : "3" }}>
           {this.context.data.sort((a, b) => {
             if (a.query.toLowerCase() < b.query.toLowerCase()) return -1
@@ -34,7 +35,7 @@ export default class Start extends React.Component {
         <div className="button-bar button-bar--center">
           <button className="button--primary" onClick={() => this.context.saveData(() => {
             history.push('/compare')
-          })}>{this.context.isRating ? (<Spinner width="15px" image={"./spinner.png"} />) : "Jämnför"}</button>
+          })}>{this.context.isRating ? (<Spinner width="15px" image={"./spinner.png"} />) : "Jämför"}</button>
         </div>
       </Fragment>
     )

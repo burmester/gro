@@ -23,6 +23,11 @@ h3 {
   }
 }
 
+.error {
+  color: $destructiv-color;
+  padding: 5px;
+}
+
 #root {
   background-color: $background-color;
   min-height: 100%;

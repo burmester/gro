@@ -10,6 +10,7 @@ class GlobalState extends Component {
 
   state = {
     data: [],
+    error: false,
     isRating: false,
     isLoading: false
   };
@@ -256,28 +257,36 @@ class GlobalState extends Component {
       callback()
       return false;
     }
-    const matHem = await this.getMatHem(query)
-    // const hemkop = await this.getHemkop(query)
-    const ica = await this.getIca(query)
-    const mat = await this.getMat(query)
+    try {
+      const matHem = await this.getMatHem(query)
+      // const hemkop = await this.getHemkop(query)
+      const ica = await this.getIca(query)
+      const mat = await this.getMat(query)
 
-    const item = {
-      order: this.state.data.length,
-      query: query,
-      result: [
-        { store: "matHem", items: matHem },
-        { store: "ica", items: ica },
-        { store: "mat", items: mat }
-      ]
+
+      const item = {
+        order: this.state.data.length,
+        query: query,
+        result: [
+          { store: "matHem", items: matHem },
+          { store: "ica", items: ica },
+          { store: "mat", items: mat }
+        ]
+      }
+      this.setState({
+        error: false,
+        data: [...this.state.data, item],
+        isRating: true
+      }, callback)
+
+      this.rateItem(item)
+      item.items = this.getSelectedItems(item)
+      this.setState({ isRating: false })
+    } catch (err) {
+      this.setState({
+        error: { code: 1, msg: query }
+      }, callback)
     }
-    this.setState({
-      data: [...this.state.data, item],
-      isRating: true
-    }, callback)
-
-    this.rateItem(item)
-    item.items = this.getSelectedItems(item)
-    this.setState({ isRating: false })
   }
 
   removeItem = async (removeItem, callback) => {
@@ -298,6 +307,7 @@ class GlobalState extends Component {
       <Context.Provider
         value={{
           data: this.state.data,
+          error: this.state.error,
           isLoading: this.state.isLoading,
           isRating: this.state.isRating,
           saveData: this.saveData,

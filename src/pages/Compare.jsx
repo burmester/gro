@@ -55,7 +55,7 @@ export default class Compare extends React.Component {
         <Table>
           <thead>
             <tr className="sticky">
-              <th>Produkt</th>
+              <th>Sökord</th>
               <th>MatHem</th>
               <th>Ica</th>
               <th>Mat.se</th>
