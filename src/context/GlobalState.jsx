@@ -4,6 +4,7 @@ import Context from "./defaultContext";
 
 import Levenshtein from 'fast-levenshtein';
 
+const DEBUG = true;
 
 class GlobalState extends Component {
 
@@ -30,9 +31,7 @@ class GlobalState extends Component {
   componentDidMount() {
     const data = localStorage.getItem("data");
     if (data) {
-      this.setState({
-        data: JSON.parse(data)
-      });
+      this.loadData(data)
     }
   }
 
@@ -42,16 +41,37 @@ class GlobalState extends Component {
   };
 
   saveData = callback => {
-    /*
-    const data = this.state.data.map(item => {
-      return {
-        query: item.query,
-        order: item.order
-      }
-    })
-    localStorage.setItem("data", JSON.stringify(data));
-    */
-    callback();
+    if (DEBUG) {
+      const data = this.state.data.map(item => ({
+        ...item,
+        items: {},
+        result: item.result.map(store => ({
+          ...store,
+          items: store.items.map(item => ({
+            ...item,
+            icaItems: [],
+            matItems: [],
+            matHemItems: []
+          }))
+        }))
+      })
+      )
+      localStorage.setItem("data", JSON.stringify(data));
+    }
+    callback()
+  }
+
+  loadData = (data) => {
+    if (DEBUG) {
+      const d = JSON.parse(data)
+      d.forEach(async item => {
+        this.rateItem(item)
+        item.items = this.getSelectedItems(item)
+      });
+      this.setState({
+        data: d
+      });
+    }
   }
 
   getMatHem = async (query) => {
@@ -131,7 +151,7 @@ class GlobalState extends Component {
     return list
   }
 
-  rateItem = async (item) => {
+  rateItem = (item) => {
     const pointsAlgorithm = (
       comparePrice1, comparePrice2,
       price1, price2,
@@ -142,10 +162,9 @@ class GlobalState extends Component {
       const diffPrice = Math.round(Math.abs(price1 - price2));
       const levName = Levenshtein.get(name1, name2);
       const levCat = Levenshtein.get(cat1, cat2);
-      if (!query) return diffcomparePrice + diffPrice + levName + levCat * 10
       const levQuery = Levenshtein.get(query, name1);
       const levQueryPop = Levenshtein.get(query, name2);
-      return diffcomparePrice + diffPrice + levName + levCat * 10 + levQuery + levQueryPop
+      return diffcomparePrice * 5 + diffPrice + levName + levCat * 10 + levQuery + levQueryPop
     }
     const itemRates = (item, points) => {
       return {
@@ -165,47 +184,44 @@ class GlobalState extends Component {
           icaItem.price, matHemItem.price,
           icaItem.name, matHemItem.name,
           icaItem.category, matHemItem.category,
-          query.query)
+          query)
 
         matHemItem.icaItems.push(itemRates(icaItem, pointsIcaMatHem))
         icaItem.matHemItems.push(itemRates(matHemItem, pointsIcaMatHem))
-
-        mat.items.forEach((matItem, k) => {
-          if (j === 0) {
-            const pointsMathemMat = pointsAlgorithm(
-              matItem.comparePrice, matHemItem.comparePrice,
-              matItem.price, matHemItem.price,
-              matItem.name, matHemItem.name,
-              matItem.category, matHemItem.category,
-              query.query)
-            matHemItem.matItems.push(itemRates(matItem, pointsMathemMat))
-            matItem.matHemItems.push(itemRates(matHemItem, pointsMathemMat))
-          }
-
-          const pointsMatIca = pointsAlgorithm(
-            matItem.comparePrice, icaItem.comparePrice,
-            matItem.price, icaItem.price,
-            matItem.name, icaItem.name,
-            matItem.category, icaItem.category,
-            query.query)
-
-          icaItem.matItems.push(itemRates(matItem, pointsMatIca))
-          matItem.icaItems.push(itemRates(icaItem, pointsMatIca))
-
-        })
+      })
+      mat.items.forEach((matItem, k) => {
+        const pointsMathemMat = pointsAlgorithm(
+          matItem.comparePrice, matHemItem.comparePrice,
+          matItem.price, matHemItem.price,
+          matItem.name, matHemItem.name,
+          matItem.category, matHemItem.category,
+          query)
+        matHemItem.matItems.push(itemRates(matItem, pointsMathemMat))
+        matItem.matHemItems.push(itemRates(matHemItem, pointsMathemMat))
+      })
+    })
+    ica.items.forEach((icaItem, j) => {
+      mat.items.forEach((matItem, k) => {
+        const pointsMatIca = pointsAlgorithm(
+          matItem.comparePrice, icaItem.comparePrice,
+          matItem.price, icaItem.price,
+          matItem.name, icaItem.name,
+          matItem.category, icaItem.category,
+          query)
+        icaItem.matItems.push(itemRates(matItem, pointsMatIca))
+        matItem.icaItems.push(itemRates(icaItem, pointsMatIca))
       })
     })
     return item
   }
 
-  sortRatedItem = async (item) => {
+  getSelectedItems = (item) => {
     const matHem = item.result.find(store => store.store === "matHem")
     const ica = item.result.find(store => store.store === "ica")
     const mat = item.result.find(store => store.store === "mat")
 
     let selected = matHem.items.find(item => item.selected)
     if (selected) {
-      debugger;
       return {
         matHem: selected,
         ica: selected.icaItems.reduce((prev, curr) => prev.points < curr.points ? prev : curr).item,
@@ -214,7 +230,6 @@ class GlobalState extends Component {
     }
     selected = ica.items.find(item => item.selected)
     if (selected) {
-      debugger;
       return {
         ica: selected,
         matHem: selected.matHemItems.reduce((prev, curr) => prev.points < curr.points ? prev : curr).item,
@@ -223,14 +238,12 @@ class GlobalState extends Component {
     }
     selected = mat.items.find(item => item.selected)
     if (selected) {
-      debugger;
       return {
         ica: selected.icaItems.reduce((prev, curr) => prev.points < curr.points ? prev : curr).item,
         matHem: selected.matHemItems.reduce((prev, curr) => prev.points < curr.points ? prev : curr).item,
         mat: selected
       }
     }
-    debugger;
     return {
       matHem: matHem.items[0],
       ica: matHem.items[0].icaItems.reduce((prev, curr) => prev.points < curr.points ? prev : curr).item,
@@ -262,8 +275,8 @@ class GlobalState extends Component {
       isRating: true
     }, callback)
 
-    await this.rateItem(item)
-    item.items = await this.sortRatedItem(item)
+    this.rateItem(item)
+    item.items = this.getSelectedItems(item)
     this.setState({ isRating: false })
   }
 
@@ -276,7 +289,7 @@ class GlobalState extends Component {
     item.items.ica.selected = false
     item.items.mat.selected = false
     selected.selected = true
-    item.items = await this.sortRatedItem(item)
+    item.items = this.getSelectedItems(item)
     this.setState({ data: this.state.data })
   }
 

@@ -22,29 +22,25 @@ export default class Compare extends React.Component {
 
   renderTotal = data => {
     let total = { matHem: 0, ica: 0, mat: 0 }
-    data.forEach((query) => {
+    data.forEach((item) => {
       total = {
-        matHem: total.matHem + query.result[0].items[0].price,
-        ica: total.ica + query.result[1].items[0].price,
-        mat: total.mat + query.result[2].items[0].price,
+        matHem: total.matHem + item.items.matHem.price,
+        ica: total.ica + item.items.ica.price,
+        mat: total.mat + item.items.mat.price
       }
     })
     return (
       <Fragment>
         <td><b>Totalt</b></td>
-        <td>{total.ica.toFixed(2)}</td>
         <td>{total.matHem.toFixed(2)}</td>
+        <td>{total.ica.toFixed(2)}</td>
         <td>{total.mat.toFixed(2)}</td>
       </Fragment>
     )
   }
 
   render() {
-    let data = this.context.data.sort((a, b) => {
-      if (a.query.toLowerCase() < b.query.toLowerCase()) return -1
-      if (a.query.toLowerCase() > b.query.toLowerCase()) return 1
-      return 0;
-    })
+    console.log(this.context.data)
     return (
       <Fragment>
         <Row>
@@ -67,10 +63,10 @@ export default class Compare extends React.Component {
             </tr>
           </thead>
           <tbody>
-            {data.map((item, i) => (
+            {this.context.data.map((item, i) => (
               <tr key={i}>
                 <td>
-                  <h3>{item.query}</h3>
+                  <h3 className="middle">{item.query}</h3>
                 </td>
                 <Item
                   name={item.items.matHem.name}
@@ -94,7 +90,7 @@ export default class Compare extends React.Component {
             ))
             }
             <tr className="sticky">
-              {this.renderTotal(data)}
+              {this.renderTotal(this.context.data)}
             </tr>
           </tbody>
         </Table>

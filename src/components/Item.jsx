@@ -5,7 +5,8 @@ export default function Item(props) {
         <td>
             <div className={props.isSelected ? "item selected" : "item"}>
                 <button onClick={props.selectItem}>
-                    <img  src={props.image} alt={props.name} />
+                    <img src={props.image} alt={props.name} />
+                    {props.isSelected && (<i class="material-icons">check_circle</i>)}
                 </button>
                 <div>
                     <h3>{props.name}</h3>

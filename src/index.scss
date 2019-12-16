@@ -1,6 +1,8 @@
 $primary-color: rgb(103, 58, 183);
 $destructiv-color: #dc3545;
 $background-color: #fbfaf8;
+$grey-color: #dedede;
+$black: #222;
 
 html,
 body {
@@ -12,6 +14,10 @@ body {
 h3 {
   font-size: 16px;
   font-weight: 700;
+
+  &.middle {
+    margin: 50% 0;
+  }
 }
 
 #root {
@@ -39,7 +45,7 @@ button {
 
   &.button--remove {
     background: none;
-    color: black;
+    color: $black;
     width: auto;
     padding: 3px;
   }
@@ -91,15 +97,33 @@ input {
 
   button {
     background: none;
+    width: 120px;
+    height: 120px;
+    margin-right: 10px;
   }
 
   img {
     width: 100px;
-    padding-right: 5px;
+    border: 5px solid #FFF;
   }
 
   &.selected {
-    background: greenyellow;
+    button {
+      position: relative;
+      background: $grey-color;
+
+      img {
+        opacity: 0.6;
+      }
+
+      .material-icons {
+        position: absolute;
+        font-size: 50px;
+        left: 35px;
+        top: 30px;
+        color: $black;
+      }
+    }
   }
 }
 
